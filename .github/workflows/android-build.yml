@@ -1,0 +1,37 @@
+name: Android Multi-Module APK Build
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle permissions
+        run: chmod +x ./gradlew
+
+      - name: Build target-app
+        run: ./gradlew :target-app:assembleRelease
+
+      - name: Build remote-app
+        run: ./gradlew :remote-app:assembleRelease
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: All-APKs
+          path: |
+            target-app/app/build/outputs/apk/release/*.apk
+            remote-app/app/build/outputs/apk/release/*.apk
